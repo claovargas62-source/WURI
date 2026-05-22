@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matriz WURI 2026</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,serif;background:#f1f5f9;min-height:100vh}
+input,textarea,button{font-family:inherit}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f1f5f9}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useMemo}=React;
+
+const AXES=[
+  {id:"A",q:"¿Para quién innovamos?",color:"#1e3a5f",accent:"#3b82f6",bg:"#eff6ff",icon:"◎",
+   dims:[
+    {label:"Para Estudiantes",icon:"🎓",cats:[
+      {id:"A1",name:"Apoyo y Compromiso Estudiantil",desc:"Programas de apoyo activo al estudiante (desde su perspectiva)."},
+      {id:"A2",name:"Movilidad Estudiantil y Apertura",desc:"Intercambios, movilidad internacional y apertura curricular."},
+    ]},
+    {label:"Para la Industria",icon:"🏭",cats:[
+      {id:"A3",name:"Aplicación Industrial",desc:"Educación e investigación con impacto tangible en la industria."},
+      {id:"A4",name:"Cultura y Ecosistema Emprendedor",desc:"Fomento del emprendimiento, startups y mentalidad innovadora."},
+    ]},
+    {label:"Para la Sociedad",icon:"🤝",cats:[
+      {id:"A5",name:"Gestión de Crisis",desc:"Preparación y liderazgo ante emergencias y situaciones críticas."},
+      {id:"A6",name:"Ética e Integridad",desc:"Valores éticos, decisiones íntegras y responsabilidad moral."},
+    ]},
+    {label:"Para la Comunidad Global",icon:"🌍",cats:[
+      {id:"A7",name:"Respuestas ante Incertidumbre Global y Riesgo Geopolítico",desc:"Iniciativas que anticipan retos globales emergentes."},
+      {id:"A8",name:"Respuestas Basadas en ODS y ESG",desc:"Alineación con los ODS de la ONU y gobernanza ESG."},
+    ]},
+  ]},
+  {id:"B",q:"¿Cómo innovamos?",color:"#14532d",accent:"#22c55e",bg:"#f0fdf4",icon:"◈",
+   dims:[
+    {label:"Liderazgo",icon:"🧭",cats:[
+      {id:"B1",name:"Liderazgo Visionario",desc:"Visión institucional clara e inspiradora que anticipa el futuro."},
+      {id:"B2",name:"Gestión Basada en Empoderamiento",desc:"Modelos que empoderan a toda la comunidad universitaria."},
+    ]},
+    {label:"Entorno",icon:"🌱",cats:[
+      {id:"B3",name:"Transformación Digital e IA en Gestión Estratégica",desc:"Adopción de IA y herramientas digitales en la gestión institucional."},
+      {id:"B4",name:"Cultura y Valores",desc:"Promoción de la identidad, cultura y valores institucionales."},
+    ]},
+    {label:"Recursos",icon:"💡",cats:[
+      {id:"B5",name:"Financiamiento para la Sostenibilidad",desc:"Diversificación de fuentes de financiamiento a largo plazo."},
+      {id:"B6",name:"Infraestructura y Tecnologías",desc:"Inversión en infraestructura física y tecnológica para la innovación."},
+    ]},
+    {label:"Mecanismos",icon:"⚙️",cats:[
+      {id:"B7",name:"Gestión de Costo-Efectividad",desc:"Optimización de recursos con máximo impacto operativo."},
+      {id:"B8",name:"Marca y Reputación Universitaria",desc:"Posicionamiento y visibilidad de la institución globalmente."},
+    ]},
+  ]},
+  {id:"C",q:"¿Qué innovamos?",color:"#6b21a8",accent:"#a855f7",bg:"#faf5ff",icon:"◆",
+   dims:[
+    {label:"Investigación",icon:"🔬",cats:[
+      {id:"C1",name:"Investigación Aplicada para el Impacto Real",desc:"Conocimiento científico con aplicación directa a desafíos del mundo real."},
+      {id:"C2",name:"Investigación Interdisciplinaria, Convergente e Integrada",desc:"Proyectos que cruzan disciplinas para producir mayor impacto."},
+    ]},
+    {label:"Educación / Instrucción",icon:"📚",cats:[
+      {id:"C3",name:"Innovación Curricular para la Preparación Futura",desc:"Currículos que forman a los estudiantes para los retos del mañana."},
+      {id:"C4",name:"Transformación de la Enseñanza Basada en IA",desc:"Uso de inteligencia artificial para transformar la enseñanza-aprendizaje."},
+    ]},
+    {label:"Servicio / Extensión",icon:"🌐",cats:[
+      {id:"C5",name:"Impacto Social mediante Transferencia de Conocimiento",desc:"Llevar el conocimiento universitario a comunidades y organizaciones."},
+      {id:"C6",name:"Innovación Social Inclusiva para Comunidades Vulnerables",desc:"Proyectos que abordan desigualdades y apoyan poblaciones marginadas."},
+    ]},
+    {label:"Comercialización",icon:"🚀",cats:[
+      {id:"C7",name:"Proyectos Emprendedores Basados en la Universidad",desc:"Convertir la investigación en productos, servicios o startups."},
+      {id:"C8",name:"Transferencia Tecnológica con Impacto Financiero",desc:"Comercialización de innovaciones que generan valor económico medible."},
+    ]},
+  ]},
+];
+
+const ALL_CATS=AXES.flatMap(ax=>ax.dims.flatMap(d=>d.cats));
+const CRIT=[
+  {key:"i",lbl:"Innovatividad",color:"#3b82f6",desc:"¿Qué tan novedoso es?"},
+  {key:"d",lbl:"Implementabilidad",color:"#22c55e",desc:"¿Es factible y los costos se justifican?"},
+  {key:"p",lbl:"Impacto",color:"#a855f7",desc:"Alcance e intensidad del efecto."},
+];
+const SL=["","Muy Bajo","Bajo","Medio","Alto","Muy Alto"];
+const SC=["","#ef4444","#f97316","#eab308","#22c55e","#3b82f6"];
+
+function lv(pct){
+  if(pct>=80)return{lbl:"INNOVACIÓN TRANSFORMADORA",col:"#1d4ed8",bg:"#dbeafe",e:"🏆"};
+  if(pct>=65)return{lbl:"INNOVACIÓN SIGNIFICATIVA",col:"#15803d",bg:"#dcfce7",e:"🌟"};
+  if(pct>=50)return{lbl:"INNOVACIÓN MODERADA",col:"#a16207",bg:"#fef9c3",e:"📈"};
+  if(pct>=35)return{lbl:"INNOVACIÓN INCIPIENTE",col:"#c2410c",bg:"#ffedd5",e:"🔧"};
+  return{lbl:"POTENCIAL POR DESARROLLAR",col:"#b91c1c",bg:"#fee2e2",e:"💡"};
+}
+function calcPct(sc){
+  const t=ALL_CATS.reduce((s,c)=>{const x=sc?.[c.id];return s+(x?(x.i||0)+(x.d||0)+(x.p||0):0);},0);
+  return Math.round(t/(ALL_CATS.length*15)*100);
+}
+function enc(name,scores){return btoa(unescape(encodeURIComponent(JSON.stringify({name,scores}))));}
+function dec(code){try{return JSON.parse(decodeURIComponent(escape(atob(code))));}catch{return null;}}
+
+function Dots({val,color,onChange}){
+  return(
+    <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+      {[1,2,3,4,5].map(n=>(
+        <button key={n} onClick={()=>onChange(n)} style={{width:34,height:34,borderRadius:"50%",
+          border:`2px solid ${n<=val?color:"#e5e7eb"}`,background:n<=val?color:"transparent",
+          cursor:"pointer",fontSize:11,fontWeight:700,color:n<=val?"#fff":"#9ca3af"}}>
+          {n}
+        </button>
+      ))}
+      {val>0&&<span style={{fontSize:10,fontWeight:600,color:SC[val],background:`${SC[val]}18`,
+        border:`1px solid ${SC[val]}40`,borderRadius:20,padding:"2px 8px"}}>{SL[val]}</span>}
+    </div>
+  );
+}
+
+function Home({onFac,onPart}){
+  return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#14532d 100%)",
+      display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{maxWidth:480,width:"100%"}}>
+        <div style={{textAlign:"center",marginBottom:32}}>
+          <div style={{fontSize:10,letterSpacing:4,color:"rgba(255,255,255,.4)",textTransform:"uppercase",marginBottom:8}}>
+            World's Universities with Real Impact
+          </div>
+          <h1 style={{fontSize:32,fontWeight:900,color:"#fff",lineHeight:1.1}}>Matriz WURI 2026</h1>
+          <p style={{color:"rgba(255,255,255,.5)",fontSize:13,marginTop:8}}>
+            24 categorías · 3 ejes · Evaluación colaborativa
+          </p>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:20}}>
+          {[
+            {lbl:"Soy FACILITADOR",sub:"Creo la sesión y veo resultados",icon:"🎯",fn:onFac},
+            {lbl:"Soy PARTICIPANTE",sub:"Me uno y evalúo el proyecto",icon:"👥",fn:onPart},
+          ].map(b=>(
+            <button key={b.lbl} onClick={b.fn} style={{
+              background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.14)",
+              borderRadius:16,padding:"22px 16px",cursor:"pointer",textAlign:"left",color:"#fff"}}>
+              <div style={{fontSize:30,marginBottom:10}}>{b.icon}</div>
+              <div style={{fontSize:14,fontWeight:700}}>{b.lbl}</div>
+              <div style={{fontSize:11,color:"rgba(255,255,255,.4)",marginTop:4}}>{b.sub}</div>
+            </button>
+          ))}
+        </div>
+        <div style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.1)",borderRadius:12,padding:"14px 18px"}}>
+          <div style={{fontSize:10,letterSpacing:2,color:"rgba(255,255,255,.4)",textTransform:"uppercase",marginBottom:10}}>
+            Framework WURI 2026 — 3 Ejes
+          </div>
+          {AXES.map(ax=>(
+            <div key={ax.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+              <div style={{width:28,height:28,borderRadius:"50%",background:ax.color,border:`2px solid ${ax.accent}`,
+                display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>
+                {ax.id}
+              </div>
+              <div>
+                <div style={{fontSize:12,fontWeight:700,color:"rgba(255,255,255,.85)"}}>{ax.q}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,.35)"}}>8 categorías</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Facilitator({onBack}){
+  const[proj,setProj]=useState("");
+  const[started,setStarted]=useState(false);
+  const[raw,setRaw]=useState("");
+  const[parts,setParts]=useState([]);
+
+  function load(){
+    const codes=raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+    let n=0;
+    const next=[...parts];
+    codes.forEach(code=>{
+      const obj=dec(code);
+      if(obj?.scores&&obj?.name&&!next.find(p=>p.code===code)){next.push({...obj,code});n++;}
+    });
+    if(n){setParts(next);setRaw("");}
+    else alert("No se encontraron códigos válidos nuevos.");
+  }
+
+  const aggPct=useMemo(()=>{
+    if(!parts.length)return 0;
+    return Math.round(parts.reduce((s,p)=>s+calcPct(p.scores),0)/parts.length);
+  },[parts]);
+  const L=lv(aggPct);
+
+  if(!started)return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f172a,#1e3a5f)",
+      display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{maxWidth:440,width:"100%",background:"rgba(255,255,255,.07)",
+        border:"1px solid rgba(255,255,255,.12)",borderRadius:20,padding:32}}>
+        <button onClick={onBack} style={{background:"none",border:"none",color:"rgba(255,255,255,.4)",cursor:"pointer",fontSize:12,marginBottom:20,padding:0}}>← Volver</button>
+        <div style={{fontSize:10,letterSpacing:2,color:"rgba(255,255,255,.4)",textTransform:"uppercase",marginBottom:6}}>Facilitador</div>
+        <h2 style={{color:"#fff",fontSize:22,marginBottom:20}}>Nueva Sesión</h2>
+        <label style={{fontSize:11,color:"rgba(255,255,255,.5)",letterSpacing:1,textTransform:"uppercase",display:"block",marginBottom:7}}>
+          Nombre del proyecto
+        </label>
+        <input value={proj} onChange={e=>setProj(e.target.value)}
+          placeholder="Ej: Plataforma de tutorías con IA generativa"
+          style={{width:"100%",padding:"12px 16px",background:"rgba(255,255,255,.1)",
+            border:"1px solid rgba(255,255,255,.2)",borderRadius:10,color:"#fff",
+            fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:20}}/>
+        <button onClick={()=>{if(proj.trim())setStarted(true);}} disabled={!proj.trim()}
+          style={{width:"100%",padding:14,background:proj.trim()?"#1e3a5f":"rgba(255,255,255,.1)",
+            border:`2px solid ${proj.trim()?"#3b82f6":"transparent"}`,borderRadius:10,
+            color:"#fff",fontSize:15,fontWeight:700,cursor:proj.trim()?"pointer":"not-allowed"}}>
+          🎯 Crear Sesión
+        </button>
+      </div>
+    </div>
+  );
+
+  return(
+    <div style={{fontFamily:"Georgia,serif",minHeight:"100vh",background:"#f1f5f9"}}>
+      <div style={{background:"linear-gradient(90deg,#0f172a,#1e3a5f)",padding:"18px 20px",color:"#fff"}}>
+        <div style={{maxWidth:720,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12}}>
+          <div>
+            <div style={{fontSize:10,letterSpacing:2,opacity:.5,textTransform:"uppercase"}}>Vista Facilitador</div>
+            <h2 style={{fontSize:20,marginTop:4}}>{proj}</h2>
+          </div>
+          <div style={{background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)",borderRadius:12,padding:"12px 20px",textAlign:"center"}}>
+            <div style={{fontSize:10,color:"rgba(255,255,255,.5)",textTransform:"uppercase",marginBottom:4}}>Instrucción</div>
+            <div style={{fontSize:12,color:"rgba(255,255,255,.8)",maxWidth:180}}>Participante evalúa → te manda su código → lo pegas abajo</div>
+          </div>
+        </div>
+      </div>
+      <div style={{maxWidth:720,margin:"0 auto",padding:16}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:16}}>
+          {[
+            {lbl:"Participantes",val:parts.length,icon:"👥"},
+            {lbl:"Categorías prom.",val:parts.length?Math.round(parts.reduce((s,p)=>s+Object.keys(p.scores||{}).length,0)/parts.length):0,icon:"📋"},
+            {lbl:"Puntuación grupal",val:`${aggPct}%`,icon:"📊"},
+          ].map(s=>(
+            <div key={s.lbl} style={{background:"#fff",borderRadius:12,padding:"14px 12px",border:"1px solid #e5e7eb",textAlign:"center"}}>
+              <div style={{fontSize:22}}>{s.icon}</div>
+              <div style={{fontSize:26,fontWeight:800,color:"#1e3a5f"}}>{s.val}</div>
+              <div style={{fontSize:11,color:"#6b7280",marginTop:2}}>{s.lbl}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{background:"#fff",borderRadius:14,border:"1px solid #e5e7eb",padding:20,marginBottom:16}}>
+          <div style={{fontSize:13,fontWeight:700,color:"#374151",marginBottom:6}}>📥 Pegar códigos de participantes</div>
+          <div style={{fontSize:11,color:"#6b7280",marginBottom:10}}>Cada participante genera un código al terminar. Pégalos aquí (uno por línea).</div>
+          <textarea value={raw} onChange={e=>setRaw(e.target.value)} placeholder="Pega aquí los códigos..."
+            style={{width:"100%",height:80,padding:10,background:"#f9fafb",border:"1px solid #e5e7eb",
+              borderRadius:10,fontSize:11,fontFamily:"monospace",resize:"vertical",boxSizing:"border-box",outline:"none"}}/>
+          <div style={{display:"flex",gap:8,marginTop:8}}>
+            <button onClick={load} disabled={!raw.trim()} style={{padding:"9px 20px",background:"#1e3a5f",border:"none",
+              borderRadius:8,color:"#fff",fontSize:13,fontWeight:700,cursor:raw.trim()?"pointer":"not-allowed",opacity:raw.trim()?1:.5}}>
+              Cargar evaluaciones
+            </button>
+            {parts.length>0&&<button onClick={()=>{if(confirm("¿Limpiar todo?"))setParts([]);}}
+              style={{padding:"9px 16px",background:"#dc2626",border:"none",borderRadius:8,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              Limpiar todo
+            </button>}
+          </div>
+        </div>
+
+        {parts.length>0&&<>
+          <div style={{background:"#fff",borderRadius:14,border:"1px solid #e5e7eb",overflow:"hidden",marginBottom:16}}>
+            <div style={{padding:"12px 18px",borderBottom:"1px solid #f3f4f6",fontSize:13,fontWeight:700,color:"#374151"}}>
+              Participantes ({parts.length})
+            </div>
+            {parts.map((p,i)=>{
+              const pp=calcPct(p.scores);const L2=lv(pp);
+              return(<div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 16px",borderBottom:"1px solid #f9fafb"}}>
+                <div style={{width:36,height:36,borderRadius:"50%",background:L2.bg,display:"flex",alignItems:"center",
+                  justifyContent:"center",fontSize:11,fontWeight:800,color:L2.col,flexShrink:0}}>
+                  {(p.name||"??").slice(0,2).toUpperCase()}
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,fontWeight:700,color:"#374151"}}>{p.name}</div>
+                  <div style={{fontSize:11,color:"#9ca3af"}}>{Object.keys(p.scores||{}).length} categorías</div>
+                </div>
+                <div style={{fontSize:18,fontWeight:800,color:L2.col}}>{pp}%</div>
+              </div>);
+            })}
+          </div>
+
+          <div style={{background:L.bg,border:`2px solid ${L.col}30`,borderRadius:14,padding:"16px 20px",
+            marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontSize:11,color:L.col,fontWeight:700,letterSpacing:1,textTransform:"uppercase"}}>{L.e} {L.lbl}</div>
+              <div style={{fontSize:11,color:`${L.col}99`,marginTop:3}}>Promedio grupal · {parts.length} participante(s)</div>
+            </div>
+            <div style={{fontSize:44,fontWeight:900,color:L.col,lineHeight:1}}>{aggPct}<span style={{fontSize:18}}>%</span></div>
+          </div>
+
+          {AXES.map(ax=>(
+            <div key={ax.id} style={{background:"#fff",borderRadius:14,border:`1px solid ${ax.accent}30`,overflow:"hidden",marginBottom:14}}>
+              <div style={{background:ax.color,padding:"12px 18px"}}>
+                <span style={{fontSize:13,fontWeight:700,color:"#fff"}}>{ax.id} — {ax.q}</span>
+              </div>
+              {ax.dims.map(dim=>(
+                <div key={dim.label}>
+                  <div style={{background:ax.bg,padding:"7px 16px",fontSize:11,fontWeight:700,color:ax.color,borderBottom:`1px solid ${ax.accent}20`}}>
+                    {dim.icon} {dim.label}
+                  </div>
+                  {dim.cats.map(cat=>{
+                    const vals=parts.map(p=>{const s=p.scores?.[cat.id];return s?(s.i||0)+(s.d||0)+(s.p||0):0;}).filter(v=>v>0);
+                    const avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;
+                    const ap=Math.round(avg/15*100);const L2=lv(ap);
+                    return(
+                      <div key={cat.id} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 16px",borderBottom:"1px solid #f3f4f6"}}>
+                        <div style={{width:36,height:36,borderRadius:8,background:L2.bg,border:`2px solid ${L2.col}40`,
+                          display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:L2.col,flexShrink:0}}>
+                          {cat.id}
+                        </div>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:12,fontWeight:700,color:"#1f2937",marginBottom:4}}>{cat.name}</div>
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <div style={{flex:1,height:6,background:"#f3f4f6",borderRadius:4,overflow:"hidden"}}>
+                              <div style={{height:"100%",width:`${ap}%`,background:L2.col}}/>
+                            </div>
+                            <span style={{fontSize:10,color:"#9ca3af",flexShrink:0}}>{vals.length} votos</span>
+                          </div>
+                        </div>
+                        <div style={{fontSize:16,fontWeight:800,color:L2.col,flexShrink:0,minWidth:42,textAlign:"right"}}>{ap}%</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          ))}
+        </>}
+      </div>
+    </div>
+  );
+}
+
+function Participant({onBack}){
+  const[step,setStep]=useState("form");
+  const[name,setName]=useState("");
+  const[proj,setProj]=useState("");
+  const[scores,setScores]=useState({});
+  const[axis,setAxis]=useState("A");
+  const[open,setOpen]=useState(null);
+  const[code,setCode]=useState("");
+  const[copied,setCopied]=useState(false);
+
+  function setScore(catId,key,val){setScores(p=>({...p,[catId]:{...(p[catId]||{}),[key]:val}}));}
+  const filled=ALL_CATS.filter(c=>{const s=scores[c.id];return s&&(s.i||0)+(s.d||0)+(s.p||0)>0;}).length;
+  const myPct=calcPct(scores);const L=lv(myPct);
+  const ax=AXES.find(a=>a.id===axis);
+
+  function submit(){
+    if(filled<8)return;
+    setCode(enc(name||"Participante",scores));setStep("done");
+  }
+  function copy(){
+    navigator.clipboard.writeText(code).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2500);}).catch(()=>{});
+  }
+
+  if(step==="form")return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f172a,#14532d)",
+      display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{maxWidth:440,width:"100%",background:"rgba(255,255,255,.07)",
+        border:"1px solid rgba(255,255,255,.12)",borderRadius:20,padding:32}}>
+        <button onClick={onBack} style={{background:"none",border:"none",color:"rgba(255,255,255,.4)",cursor:"pointer",fontSize:12,marginBottom:20,padding:0}}>← Volver</button>
+        <div style={{fontSize:10,letterSpacing:2,color:"rgba(255,255,255,.4)",textTransform:"uppercase",marginBottom:6}}>Participante</div>
+        <h2 style={{color:"#fff",fontSize:22,marginBottom:20}}>Iniciar Evaluación</h2>
+        {[
+          {lbl:"Tu nombre",val:name,set:setName,ph:"Ej: María García"},
+          {lbl:"Nombre del proyecto (opcional)",val:proj,set:setProj,ph:"Lo indica el facilitador"},
+        ].map(f=>(
+          <div key={f.lbl} style={{marginBottom:16}}>
+            <label style={{fontSize:11,color:"rgba(255,255,255,.5)",letterSpacing:1,textTransform:"uppercase",display:"block",marginBottom:7}}>{f.lbl}</label>
+            <input value={f.val} onChange={e=>f.set(e.target.value)} placeholder={f.ph}
+              style={{width:"100%",padding:"12px 16px",background:"rgba(255,255,255,.1)",
+                border:"1px solid rgba(255,255,255,.2)",borderRadius:10,color:"#fff",
+                fontSize:14,outline:"none",boxSizing:"border-box"}}/>
+          </div>
+        ))}
+        <button onClick={()=>{if(name.trim())setStep("vote");}} disabled={!name.trim()}
+          style={{width:"100%",padding:14,background:name.trim()?"#14532d":"rgba(255,255,255,.1)",
+            border:`2px solid ${name.trim()?"#22c55e":"transparent"}`,borderRadius:10,
+            color:"#fff",fontSize:15,fontWeight:700,cursor:name.trim()?"pointer":"not-allowed",marginTop:4}}>
+          👥 Comenzar Evaluación
+        </button>
+      </div>
+    </div>
+  );
+
+  if(step==="done")return(
+    <div style={{minHeight:"100vh",background:"#f1f5f9",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{maxWidth:480,width:"100%",textAlign:"center"}}>
+        <div style={{fontSize:64,marginBottom:16}}>✅</div>
+        <h2 style={{color:"#1e3a5f",marginBottom:8}}>¡Evaluación lista!</h2>
+        <p style={{color:"#6b7280",fontSize:13,marginBottom:20}}>
+          Copia tu código y mándalo al facilitador (por WhatsApp, chat, o léelo en voz alta).
+        </p>
+        <div style={{background:"#1e3a5f",borderRadius:14,padding:20,marginBottom:16}}>
+          <div style={{fontSize:11,color:"rgba(255,255,255,.5)",letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>Tu código de resultado</div>
+          <div style={{fontFamily:"monospace",fontSize:11,color:"#93c5fd",wordBreak:"break-all",
+            background:"rgba(0,0,0,.3)",borderRadius:8,padding:"10px 12px",marginBottom:12,
+            maxHeight:90,overflowY:"auto",textAlign:"left"}}>{code}</div>
+          <button onClick={copy} style={{width:"100%",padding:11,background:copied?"#15803d":"#3b82f6",
+            border:"none",borderRadius:10,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer"}}>
+            {copied?"✅ ¡Copiado!":"📋 Copiar código"}
+          </button>
+        </div>
+        <div style={{background:L.bg,borderRadius:12,padding:"16px 20px"}}>
+          <div style={{fontSize:11,color:L.col,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{L.e} {L.lbl}</div>
+          <div style={{fontSize:48,fontWeight:900,color:L.col,lineHeight:1}}>{myPct}<span style={{fontSize:20}}>%</span></div>
+          <div style={{fontSize:11,color:`${L.col}99`,marginTop:4}}>{filled} de 24 categorías evaluadas</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return(
+    <div style={{fontFamily:"Georgia,serif",minHeight:"100vh",background:"#f1f5f9",paddingBottom:80}}>
+      <div style={{background:ax.color,padding:"14px 16px 10px",position:"sticky",top:0,zIndex:10}}>
+        <div style={{maxWidth:640,margin:"0 auto"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontSize:10,color:"rgba(255,255,255,.45)",letterSpacing:2,textTransform:"uppercase"}}>
+                {proj||"Evaluación WURI 2026"}
+              </div>
+              <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>{name}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:10,color:"rgba(255,255,255,.45)"}}>Puntuación</div>
+              <div style={{fontSize:26,fontWeight:900,color:"#fff"}}>{myPct}%</div>
+            </div>
+          </div>
+          <div style={{marginTop:8,height:4,background:"rgba(255,255,255,.2)",borderRadius:4,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${filled/24*100}%`,background:"rgba(255,255,255,.75)"}}/>
+          </div>
+          <div style={{fontSize:10,color:"rgba(255,255,255,.4)",marginTop:3}}>{filled} de 24 categorías evaluadas</div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:640,margin:"0 auto",padding:"12px 16px"}}>
+        <div style={{display:"flex",gap:8,margin:"12px 0 10px"}}>
+          {AXES.map(a=>{
+            const isA=a.id===axis;
+            return(
+              <button key={a.id} onClick={()=>{setAxis(a.id);setOpen(null);}} style={{
+                flex:1,padding:"10px 4px",borderRadius:10,cursor:"pointer",fontSize:12,fontWeight:700,
+                background:isA?a.color:"#fff",color:isA?"#fff":"#374151",
+                border:isA?"none":"1px solid #e5e7eb"}}>
+                <div style={{fontSize:16}}>{a.icon}</div>
+                <div style={{fontSize:10,marginTop:2}}>{a.id}</div>
+              </button>
+            );
+          })}
+        </div>
+        <div style={{fontSize:11,color:"#6b7280",textAlign:"center",marginBottom:10}}>{ax.q}</div>
+
+        {ax.dims.map(dim=>(
+          <div key={dim.label} style={{marginBottom:6}}>
+            <div style={{background:ax.bg,padding:"8px 14px",borderLeft:`3px solid ${ax.accent}`,
+              fontSize:12,fontWeight:700,color:ax.color,marginBottom:2}}>
+              {dim.icon} {dim.label}
+            </div>
+            {dim.cats.map(cat=>{
+              const sc=scores[cat.id]||{};
+              const tot=(sc.i||0)+(sc.d||0)+(sc.p||0);
+              const pct=Math.round(tot/15*100);const L2=lv(pct);
+              const has=tot>0;const isOpen=open===cat.id;
+              return(
+                <div key={cat.id} style={{background:"#fff",borderBottom:"1px solid #f3f4f6"}}>
+                  <div onClick={()=>setOpen(isOpen?null:cat.id)}
+                    style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",cursor:"pointer"}}>
+                    <div style={{width:38,height:38,borderRadius:8,flexShrink:0,
+                      background:has?L2.bg:"#f9fafb",border:`2px solid ${has?L2.col:"#e5e7eb"}`,
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      fontSize:10,fontWeight:800,color:has?L2.col:"#9ca3af"}}>
+                      {cat.id}
+                    </div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:12,fontWeight:700,color:"#1f2937",marginBottom:2}}>{cat.name}</div>
+                      <div style={{fontSize:10,color:"#9ca3af",lineHeight:1.3}}>{cat.desc}</div>
+                    </div>
+                    <div style={{fontSize:16,fontWeight:800,color:has?L2.col:"#d1d5db",flexShrink:0,minWidth:40,textAlign:"right"}}>
+                      {has?`${pct}%`:"—"}
+                    </div>
+                    <div style={{color:"#d1d5db",fontSize:14,transform:isOpen?"rotate(180deg)":"none",flexShrink:0}}>▾</div>
+                  </div>
+                  {isOpen&&(
+                    <div style={{padding:"10px 14px 16px 62px",background:"#fafafa",borderTop:"1px solid #f3f4f6"}}>
+                      {CRIT.map(cr=>{
+                        const v=sc[cr.key]||0;
+                        return(
+                          <div key={cr.key} style={{marginBottom:14}}>
+                            <div style={{fontSize:11,fontWeight:700,color:cr.color,marginBottom:6}}>
+                              <span style={{background:cr.color,color:"#fff",borderRadius:4,padding:"1px 7px",fontSize:10,marginRight:6}}>
+                                {cr.key.toUpperCase()}
+                              </span>
+                              {cr.lbl}
+                              <span style={{fontWeight:400,color:"#6b7280",fontSize:10}}> — {cr.desc}</span>
+                            </div>
+                            <Dots val={v} color={cr.color} onChange={val=>setScore(cat.id,cr.key,val)}/>
+                          </div>
+                        );
+                      })}
+                      {tot>0&&(
+                        <div style={{background:L2.bg,borderRadius:8,padding:"8px 12px",
+                          border:`1px solid ${L2.col}30`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                          <span style={{fontSize:12,fontWeight:700,color:L2.col}}>{cat.id}: {tot}/15 pts</span>
+                          <span style={{fontSize:10,fontWeight:700,color:L2.col}}>{L2.e} {L2.lbl}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      <div style={{position:"fixed",bottom:0,left:0,right:0,padding:"12px 16px",
+        background:"rgba(255,255,255,.96)",backdropFilter:"blur(8px)",borderTop:"1px solid #e5e7eb",textAlign:"center"}}>
+        <button onClick={submit} disabled={filled<8} style={{
+          padding:"13px 44px",background:filled>=8?"#1e3a5f":"#e5e7eb",border:"none",
+          borderRadius:12,color:filled>=8?"#fff":"#9ca3af",fontSize:14,fontWeight:700,
+          cursor:filled>=8?"pointer":"not-allowed"}}>
+          {filled>=8?`Generar código (${filled}/24)`:`Evalúa mínimo 8 categorías (${filled}/24)`}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const[view,setView]=useState("home");
+  if(view==="home")return<Home onFac={()=>setView("fac")} onPart={()=>setView("part")}/>;
+  if(view==="fac") return<Facilitator onBack={()=>setView("home")}/>;
+  if(view==="part")return<Participant  onBack={()=>setView("home")}/>;
+  return null;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
